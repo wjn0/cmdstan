@@ -86,6 +86,23 @@ bad_models = frozenset(
      , "examples/example-models/bugs_examples/vol1/rats/rats_stanified.stan"
      , "examples/example-models/bugs_examples/vol2/pines/pines-4.stan"
      , "examples/example-models/bugs_examples/vol2/pines/fit.stan"
+     , "examples/example-models/BPA/Ch.06/MtX.stan"
+     , "examples/example-models/ARM/Ch.21/radon_vary_intercept_a.stan"
+     , "examples/example-models/ARM/Ch.21/radon_vary_intercept_b.stan"
+     , "examples/example-models/ARM/Ch.23/sesame_street2.stan"
+     , "examples/example-models/ARM/Ch.3/kidiq_validation.stan"
+     , "examples/example-models/ARM/Ch.7/earnings_interactions.stan"
+     , "examples/example-models/ARM/Ch.8/y_x.stan"
+     , "examples/example-models/basic_estimators/normal_mixture_k.stan"
+     , "examples/example-models/basic_estimators/normal_mixture_k_prop.stan"
+     , "examples/example-models/BPA/Ch.04/GLM0.stan"
+     , "examples/example-models/BPA/Ch.04/GLM1.stan"
+     , "examples/example-models/BPA/Ch.04/GLM2.stan"
+     , "examples/example-models/BPA/Ch.04/GLMM3.stan"
+     , "examples/example-models/BPA/Ch.04/GLMM4.stan"
+     , "examples/example-models/BPA/Ch.04/GLMM5.stan"
+     , "examples/example-models/BPA/Ch.05/ssm2.stan"
+     , "examples/example-models/BPA/Ch.07/cjs_group_raneff.stan"
     ])
 
 def avg(coll):
@@ -171,8 +188,9 @@ def test_results_xml(tests):
     root = ET.Element("testsuite", failures=failures, name="Performance Tests",
                       tests=str(len(tests)), time=str(time_))
     for model, time_, fails, errors in tests:
+        name = model.replace(".stan", "").replace("/", ".")
         time_ = str(time_)
-        testcase = ET.SubElement(root, "testcase", classname=model, time=time_)
+        testcase = ET.SubElement(root, "testcase", classname=name, time=time_)
         for fail in fails:
             testcase = ET.SubElement(root, "failure", type="param mismatch")
             testcase.text = ("param {} got mean {}, gold has mean {} and stdev {}"
@@ -217,7 +235,7 @@ if __name__ == "__main__":
     models = filter(model_name_re.match, models)
     models = list(filter(lambda m: not m in bad_models, models))
     executables = [m[:-5] for m in models]
-    time_step("make_all_models", make, executables, args.j)
+    make_time, _ = time_step("make_all_models", make, executables, args.j)
     tests = [(model, exe, find_data_for_model(model))
              for model, exe in zip(models, executables)]
     tests = filter(lambda x: x[2], tests)
@@ -226,6 +244,7 @@ if __name__ == "__main__":
                                              args.check_golds_exact, args.runs),
                                 tests)
     results = list(results)
+    results.append(("compilation", make_time, [], []))
     test_results_xml(results).write("performance.xml")
     with open("performance.csv", "w") as f:
         f.write(test_results_csv(results))
