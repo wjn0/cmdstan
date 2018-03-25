@@ -51,7 +51,8 @@ def shexec(command):
     print(command)
     returncode = subprocess.call(command, shell=True)
     if returncode != 0:
-        raise Exception("{} from '{}'!".format(returncode, command))
+        raise Exception("return code '{}' from command '{}'!"
+                        .format(returncode, command))
     return returncode
 
 def make(targets, j=8):
@@ -84,6 +85,7 @@ bad_models = frozenset(
      , "examples/example-models/bugs_examples/vol1/dogs/dogs.stan"
      , "examples/example-models/bugs_examples/vol1/rats/rats_stanified.stan"
      , "examples/example-models/bugs_examples/vol2/pines/pines-4.stan"
+     , "examples/example-models/bugs_examples/vol2/pines/fit.stan"
     ])
 
 def avg(coll):
