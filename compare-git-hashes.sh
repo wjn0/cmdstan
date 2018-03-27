@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e -x
 
 usage() {
     echo "This will clean all repos involved! Use only on a clean checkout."
@@ -27,8 +27,9 @@ clean_checkout "$1"
 git submodule foreach --recursive git clean -xffd
 make clean-all
 for i in performance.*; do
-    mv $i "$1_$i"
+    mv $i "${1}_${i}"
 done
 
 git checkout $2
+git submodule update --recursive
 ./runPerformanceTests.py -j8 --runj 5 --check-golds-exact 1e-8 $4 $3
