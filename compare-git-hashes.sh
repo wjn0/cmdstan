@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-    echo "$0 <git-hash-1> <git-hash-2> '<extra args for runPerformanceTests.py>''"
+    echo "$0 <git-hash-1> <git-hash-2> <directories of models> '<extra args for runPerformanceTests.py>''"
 }
 
 checkout() {
@@ -14,8 +14,13 @@ checkout() {
     fi
 }
 
+if [ $1 == "" ] || [ $2 == ""] || [ $3 = "" ]; then
+    usage
+    exit
+fi
+
 checkout "$1"
-./runPerformanceTests.py -j8 --runj 5 --overwrite-golds $3
+./runPerformanceTests.py -j8 --runj 5 --overwrite-golds $4 $3
 
 checkout "$2"
-./runPerformanceTests.py -j8 --runj 5 --check-golds-exact 1e-8 $3
+./runPerformanceTests.py -j8 --runj 5 --check-golds-exact 1e-8 $4 $3
