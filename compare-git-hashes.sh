@@ -15,7 +15,7 @@ checkout() {
     fi
 }
 
-if [ "$1" == "" ] || [ "$2" == ""] || [ "$3" == "" ]; then
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     usage
     exit
 fi
