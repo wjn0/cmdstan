@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 usage() {
     echo "$0 <git-hash-1> <git-hash-2> <directories of models> '<extra args for runPerformanceTests.py>''"
