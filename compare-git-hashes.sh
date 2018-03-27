@@ -33,3 +33,4 @@ done
 git checkout $2
 git submodule update --recursive
 ./runPerformanceTests.py -j8 --runj 5 --check-golds-exact 1e-8 $4 $3
+python comparePerformance.py "${1}_performance.csv" performance.csv
