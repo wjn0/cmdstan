@@ -109,6 +109,8 @@ def avg(coll):
     return float(sum(coll)) / len(coll)
 
 def stdev(coll, mean):
+    if len(coll ) < 2:
+        return 0
     return (sum((x - mean)**2 for x in coll) / (len(coll) - 1)**0.5)
 
 def csv_summary(csv_file):
@@ -141,7 +143,7 @@ def parse_summary(f):
         d[param] = (float(avg), float(stdev))
     return d
 
-def run(exe, data, overwrite, check_golds, check_golds_exact, runs):
+def run(exe, data, overwrite, check_golds, check_golds_exact, runs, cmdstan_args):
     fails, errors = [], []
     gold = os.path.join(GOLD_OUTPUT_DIR, exe.replace("/", "_") + ".gold")
     tmp = gold + ".tmp"
@@ -149,8 +151,8 @@ def run(exe, data, overwrite, check_golds, check_golds_exact, runs):
         total_time = 0
         for i in range(runs):
             start = time()
-            shexec("{} sample data file={} random seed=1234 output file={}"
-                   .format(exe, data, tmp))
+            shexec("{} {} data file={} random seed=1234 output file={}"
+                   .format(exe, cmdstan_args, data, tmp))
             end = time()
             total_time += end-start
     except Exception as e:
@@ -217,13 +219,17 @@ def parse_args():
                         help="Number of runs per benchmark.", default=1)
     parser.add_argument("-j", dest="j", action="store", type=int, default=4)
     parser.add_argument("--runj", dest="runj", action="store", type=int, default=1)
+    parser.add_argument("--cmdstan-args", dest="cmdstan_args", action="store",
+                        default="method=sample",
+                        help="Options to cmdstan binary. Must include method=")
     return parser.parse_args()
 
-def process_test(overwrite, check_golds, check_golds_exact, runs):
+def process_test(overwrite, check_golds, check_golds_exact, runs, cmdstan_args):
     def process_test_wrapper(tup):
         # TODO: figure out the right place to compute the average or maybe don't compute the average.
         model, exe, data = tup
-        time_, (fails, errors) = run(exe, data, overwrite, check_golds, check_golds_exact, runs)
+        time_, (fails, errors) = run(exe, data, overwrite, check_golds,
+                                     check_golds_exact, runs, cmdstan_args)
         average_time = time_ / runs
         return (model, average_time, fails, errors)
     return process_test_wrapper
@@ -239,10 +245,15 @@ if __name__ == "__main__":
     tests = [(model, exe, find_data_for_model(model))
              for model, exe in zip(models, executables)]
     tests = filter(lambda x: x[2], tests)
-    tp = ThreadPool(args.runj)
-    results = tp.imap_unordered(process_test(args.overwrite, args.check_golds,
-                                             args.check_golds_exact, args.runs),
-                                tests)
+    if args.runj > 1:
+        tp = ThreadPool(args.runj)
+        map_ = tp.imap_unordered
+    else:
+        map_ = map
+    results = map_(process_test(args.overwrite, args.check_golds,
+                                args.check_golds_exact, args.runs,
+                                args.cmdstan_args),
+                    tests)
     results = list(results)
     results.append(("compilation", make_time, [], []))
     test_results_xml(results).write("performance.xml")
