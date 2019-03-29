@@ -154,14 +154,22 @@ int main(int argc, const char* argv[]) {
     treedepths.emplace_back(stan_csv.metadata.max_depth);
 
     // write sample
+    // for (size_t i = 0; i < stan_csv.samples.rows(); ++i) {
+    //   std::vector<double> draw;
+    //   draw.resize(stan_csv.samples.row(i).size());
+    //   Eigen::RowVectorXd::Map(&draw[0], stan_csv.samples.row(i).size()) = stan_csv.samples.row(i);
+    //   cmdstan::write_draw(collate_writer, draw);
+    // }
+
     for (size_t i = 0; i < stan_csv.samples.rows(); ++i) {
-      Eigen::RowVectorXd rv;
-      rv = stan_csv.samples.row(i);
-      std::vector<double> draw;
-      draw.resize(rv.size());
-      Eigen::VectorXd::Map(&draw[0], rv.size()) = rv;
+      int M = stan_csv.samples.cols();
+      std::vector<double> draw(static_cast<size_t>(M));
+      for (int j = 0; j < M; ++j)
+        draw[j] = stan_csv.samples(i, j);
       cmdstan::write_draw(collate_writer, draw);
     }
+        
+
   }
   write_chain_config(collate_writer, "chain_ids: ", chain_ids);
   write_chain_config(collate_writer, "chain_draws: ", draws);
