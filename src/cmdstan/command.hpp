@@ -29,6 +29,7 @@
 #include <stan/services/diagnose/diagnose.hpp>
 #include <stan/services/experimental/advi/fullrank.hpp>
 #include <stan/services/experimental/advi/meanfield.hpp>
+#include <stan/services/experimental/advi/lowrank.hpp>
 #include <stan/services/optimize/bfgs.hpp>
 #include <stan/services/optimize/lbfgs.hpp>
 #include <stan/services/optimize/newton.hpp>
@@ -875,6 +876,15 @@ int command(int argc, const char *argv[]) {
       return_code = stan::services::experimental::advi::meanfield(
           model, *init_context, random_seed, id, init_radius, grad_samples,
           elbo_samples, max_iterations, tol_rel_obj, eta, adapt_engaged,
+          adapt_iterations, eval_elbo, output_samples, interrupt, logger,
+          init_writer, sample_writer, diagnostic_writer);
+    } else if (algo->value() == "lowrank") {
+      int rank
+          = dynamic_cast<int_argument *>(
+                parser.arg("method")->arg("variational")->arg("rank"))->value();          
+      return_code = stan::services::experimental::advi::lowrank(
+          model, *init_context, random_seed, id, init_radius, grad_samples,
+          elbo_samples, max_iterations, tol_rel_obj, rank, eta, adapt_engaged,
           adapt_iterations, eval_elbo, output_samples, interrupt, logger,
           init_writer, sample_writer, diagnostic_writer);
     }

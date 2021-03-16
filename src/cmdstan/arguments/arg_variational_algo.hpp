@@ -4,6 +4,7 @@
 #include <cmdstan/arguments/list_argument.hpp>
 #include <cmdstan/arguments/arg_variational_fullrank.hpp>
 #include <cmdstan/arguments/arg_variational_meanfield.hpp>
+#include <cmdstan/arguments/arg_variational_lowrank.hpp>
 
 namespace cmdstan {
 
@@ -15,6 +16,7 @@ class arg_variational_algo : public list_argument {
 
     _values.push_back(new arg_variational_meanfield());
     _values.push_back(new arg_variational_fullrank());
+    _values.push_back(new arg_variational_lowrank());
 
     _default_cursor = 0;
     _cursor = _default_cursor;

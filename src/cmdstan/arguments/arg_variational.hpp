@@ -9,6 +9,7 @@
 #include <cmdstan/arguments/arg_variational_iter.hpp>
 #include <cmdstan/arguments/arg_variational_num_samples.hpp>
 #include <cmdstan/arguments/arg_variational_output_samples.hpp>
+#include <cmdstan/arguments/arg_variational_rank.hpp>
 #include <cmdstan/arguments/categorical_argument.hpp>
 #include <stan/services/experimental/advi/defaults.hpp>
 
@@ -27,6 +28,7 @@ class arg_variational : public categorical_argument {
 
     _subarguments.push_back(new arg_variational_algo());
     _subarguments.push_back(new arg_variational_iter());
+    _subarguments.push_back(new arg_variational_rank());
     _subarguments.push_back(new arg_variational_num_samples(
         "grad_samples", gradient_samples::description().c_str(),
         gradient_samples::default_value()));

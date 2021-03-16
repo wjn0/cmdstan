@@ -74,3 +74,14 @@ TEST_F(CmdStan, variational_fullrank) {
   ASSERT_EQ(1, chains.num_chains());
   ASSERT_EQ(1001, chains.num_samples());
 }
+
+TEST_F(CmdStan, variational_lowrank) {
+  run_command_output out
+      = run_command(base_command + " variational algorithm=lowrank rank=1");
+
+  ASSERT_EQ(0, out.err_code);
+
+  stan::mcmc::chains<> chains = parse_output_file();
+  ASSERT_EQ(1, chains.num_chains());
+  ASSERT_EQ(1001, chains.num_samples());
+}
